@@ -1,0 +1,9 @@
+{
+  "name": "NEW UNIFIED 4.O",
+  "description": "A smart city and citizen-connect app for India, connecting people, government, and services on a single platform. Report issues, get updates, access emergency services, and engage with your community.",
+  "requestFramePermissions": [
+    "geolocation",
+    "camera",
+    "microphone"
+  ]
+}
