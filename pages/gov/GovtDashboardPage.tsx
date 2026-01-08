@@ -43,6 +43,7 @@ interface GovtDashboardPageProps {
 
 const GovtDashboardPage: React.FC<GovtDashboardPageProps> = ({ reports: initialReports, onUpdateReportStatus, onAssignReport, alerts: initialAlerts, onSOSAction }) => {
     const { user } = useContext(UserContext);
+    // FIX: Changed 'dashboard' to 'control-room' to match GovtView type
     const [activeView, setActiveView] = useState<GovtView>('control-room');
     const [selectedIssue, setSelectedIssue] = useState<DetailedReport | null>(null);
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -178,6 +179,7 @@ const GovtDashboardPage: React.FC<GovtDashboardPageProps> = ({ reports: initialR
             case 'administration':
                  return <ProfileView isLoading={isLoading} />;
             default:
+                // FIX: Changed 'dashboard' fallback to 'control-room'
                 return <ControlRoomView reports={reports} onSelectIssue={setSelectedIssue} isLoading={isLoading} alerts={alerts} />;
         }
     };

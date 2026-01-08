@@ -1,42 +1,55 @@
-import React from 'react';
-import { useTranslation } from '../../hooks/useTranslation';
+
+import React, { useState, useEffect } from 'react';
 import ServicePageLayout from './ServicePageLayout';
-import { ParkingIcon } from '../../components/icons/NavIcons';
+import { ParkingIcon, LocationMarkerIcon, CheckCircleIcon } from '../../components/icons/NavIcons';
 
-interface ParkingFinderPageProps {
-  onBack: () => void;
-}
+const ParkingFinderPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+    const [loading, setLoading] = useState(true);
+    const [spots, setSpots] = useState<any[]>([]);
 
-const parkingLots = [
-  { name: 'Central Mall Parking', distance: '0.5 km', available: 25, total: 100 },
-  { name: 'City Center Lot A', distance: '1.2 km', available: 5, total: 50 },
-  { name: 'Railway Station Parking', distance: '2.8 km', available: 80, total: 200 },
-];
-
-const ParkingLotCard: React.FC<{ lot: typeof parkingLots[0] }> = ({ lot }) => {
-    const availability = (lot.available / lot.total) * 100;
-    const color = availability > 50 ? 'text-green-600' : availability > 20 ? 'text-yellow-600' : 'text-red-600';
+    useEffect(() => {
+        setTimeout(() => {
+            setSpots([
+                { name: 'Koyambedu CMBT Parking', distance: '0.2 km', available: 42, total: 100, price: '₹20/hr' },
+                { name: 'Phoenix Market City Lot B', distance: '1.5 km', available: 5, total: 500, price: '₹50/hr' },
+                { name: 'Marina Beach South Lot', distance: '3.1 km', available: 12, total: 200, price: '₹10/hr' },
+                { name: 'T-Nagar Smart Parking', distance: '0.8 km', available: 1, total: 20, price: '₹30/hr' },
+            ]);
+            setLoading(false);
+        }, 1000);
+    }, []);
 
     return (
-        <div className="bg-white p-4 rounded-xl border border-gray-200 flex justify-between items-center">
-            <div>
-                <h3 className="font-bold text-gray-800">{lot.name}</h3>
-                <p className="text-sm text-gray-500">{lot.distance}</p>
-            </div>
-            <div className="text-right">
-                <p className={`font-bold text-lg ${color}`}>{lot.available}</p>
-                <p className="text-xs text-gray-500">slots available</p>
-            </div>
-        </div>
-    );
-};
-
-const ParkingFinderPage: React.FC<ParkingFinderPageProps> = ({ onBack }) => {
-    const { t } = useTranslation();
-    return (
-        <ServicePageLayout title={t('parkingFinder')} subtitle={t('parkingFinderDesc')} onBack={onBack}>
-            <div className="space-y-3">
-                {parkingLots.map(lot => <ParkingLotCard key={lot.name} lot={lot} />)}
+        <ServicePageLayout title="Parking Finder" subtitle="Live Availability • TN Smart City" onBack={onBack}>
+            <div className="space-y-4">
+                {loading ? (
+                    <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+                        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                        <p className="font-semibold">Searching for vacant spots...</p>
+                    </div>
+                ) : (
+                    spots.map((spot, i) => (
+                        <div key={i} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-lg flex items-center justify-between animate-fadeInUp" style={{animationDelay: `${i*100}ms`}}>
+                            <div className="flex-1">
+                                <h3 className="font-bold text-gray-800 text-lg leading-tight">{spot.name}</h3>
+                                <div className="flex items-center text-xs text-gray-400 mt-1 font-semibold uppercase tracking-wider">
+                                    <LocationMarkerIcon className="w-3 h-3 mr-1" />
+                                    <span>{spot.distance} • {spot.price}</span>
+                                </div>
+                                <div className="mt-4 flex gap-1">
+                                    {Array.from({length: 10}).map((_, j) => (
+                                        <div key={j} className={`h-1 flex-1 rounded-full ${j < (spot.available/spot.total)*10 ? 'bg-blue-500' : 'bg-gray-100'}`}></div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="ml-6 text-center">
+                                <p className={`text-3xl font-black ${spot.available < 10 ? 'text-red-500' : 'text-blue-600'}`}>{spot.available}</p>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase">Available</p>
+                                <button className="mt-2 px-4 py-1.5 bg-blue-50 text-blue-700 text-xs font-bold rounded-full border border-blue-100">BOOK</button>
+                            </div>
+                        </div>
+                    ))
+                )}
             </div>
         </ServicePageLayout>
     );

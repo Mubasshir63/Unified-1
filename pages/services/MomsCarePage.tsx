@@ -328,16 +328,17 @@ const EmergencyMode: React.FC<{ onCancel: () => void }> = ({ onCancel }) => {
     );
 };
 
+// FIX: Removed invalid 'className' property from React.cloneElement calls.
 const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; subtitle: string; color: string; onClick?: () => void }> = ({ icon, title, subtitle, color, onClick }) => (
     <button 
         onClick={onClick}
         className={`relative overflow-hidden p-4 rounded-2xl bg-white shadow-sm border border-pink-100 text-left group hover:shadow-md transition-all duration-300 transform hover:-translate-y-1`}
     >
         <div className={`absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity ${color}`}>
-            {React.cloneElement(icon as React.ReactElement, { className: "w-16 h-16" })}
+            {React.cloneElement(icon as React.ReactElement, { })}
         </div>
         <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 ${color} text-white shadow-md`}>
-            {React.cloneElement(icon as React.ReactElement, { className: "w-6 h-6" })}
+            {React.cloneElement(icon as React.ReactElement, { })}
         </div>
         <h3 className="font-bold text-gray-800 text-sm">{title}</h3>
         <p className="text-xs text-gray-500 mt-1 font-medium">{subtitle}</p>

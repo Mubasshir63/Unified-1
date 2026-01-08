@@ -29,7 +29,8 @@ interface GovtDashboardPageProps {
 
 const GovtDashboardPage: React.FC<GovtDashboardPageProps> = ({ reports, onUpdateReportStatus, onAssignReport, alerts, onSOSAction }) => {
     const { user } = useContext(UserContext);
-    const [activeView, setActiveView] = useState<GovtView>('dashboard');
+    // FIX: Changed 'dashboard' to 'control-room' as 'dashboard' is not a valid GovtView type.
+    const [activeView, setActiveView] = useState<GovtView>('control-room');
     const [selectedIssue, setSelectedIssue] = useState<DetailedReport | null>(null);
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
     const [team, setTeam] = useState<TeamMember[]>([]);
@@ -102,7 +103,8 @@ const GovtDashboardPage: React.FC<GovtDashboardPageProps> = ({ reports, onUpdate
 
     const renderView = () => {
         switch (activeView) {
-            case 'dashboard':
+            // FIX: Changed 'dashboard' to 'control-room' to match the GovtView union type.
+            case 'control-room':
                 return <DashboardView issues={reports} onSelectIssue={setSelectedIssue} isLoading={isLoading} alerts={alerts} />;
             case 'sos':
                 return <SOSView alerts={alerts} onAction={onSOSAction} isLoading={isLoading} />;

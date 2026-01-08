@@ -1,18 +1,14 @@
-
 import React, { useContext, useState, useMemo, useEffect, useRef } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import { useNotifications } from '../contexts/NotificationsContext';
 import { useTranslation } from '../hooks/useTranslation';
-import type { Announcement, DonationRequest, ResolvedIssue, SOSState, CityPulse } from '../types';
+import type { Announcement, CityPulse } from '../types';
 import { ReportStatus, Page } from '../types';
 import { 
     PoliceIcon, AmbulanceIcon, FireDeptIcon, BloodBankIcon, HospitalIcon, NewReportIcon, 
-    CertificateIcon, PayBillsIcon, NewConnectionIcon, MyReportsIcon, CheckCircleIcon, SOSIcon, PhoneVibrateIcon, AiAssistantIcon
+    SOSIcon, AiAssistantIcon, PregnantWomanIcon, SyringeIcon
 } from '../components/icons/NavIcons';
-import OnboardingGuide from '../components/OnboardingGuide';
 import * as mockApi from '../api/mockApi';
-
-// --- SUB-COMPONENTS ---
 
 const CityPulseBar: React.FC<{ pulse: CityPulse | null }> = ({ pulse }) => {
     if (!pulse) return null;
@@ -25,10 +21,10 @@ const CityPulseBar: React.FC<{ pulse: CityPulse | null }> = ({ pulse }) => {
                 { label: 'Water', value: `${pulse.waterUptime}%`, sub: 'Supply', color: 'text-cyan-600', bg: 'bg-cyan-50' },
                 { label: 'Events', value: pulse.activeEvents, sub: 'Live Now', color: 'text-purple-600', bg: 'bg-purple-50' },
             ].map(stat => (
-                <div key={stat.label} className={`flex-shrink-0 min-w-[100px] p-3 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center justify-center ${stat.bg} animate-fadeInUp`}>
-                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">{stat.label}</p>
-                    <p className={`text-xl font-black ${stat.color}`}>{stat.value}</p>
-                    <p className="text-[9px] font-semibold text-gray-400">{stat.sub}</p>
+                <div key={stat.label} className={`flex-shrink-0 min-w-[110px] p-4 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col items-center justify-center ${stat.bg} animate-fadeInUp`}>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{stat.label}</p>
+                    <p className={`text-2xl font-black ${stat.color}`}>{stat.value}</p>
+                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">{stat.sub}</p>
                 </div>
             ))}
         </div>
@@ -36,10 +32,10 @@ const CityPulseBar: React.FC<{ pulse: CityPulse | null }> = ({ pulse }) => {
 };
 
 const SectionHeader: React.FC<{ title: string; actionText?: string; onActionClick?: () => void }> = ({ title, actionText, onActionClick }) => (
-    <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-gray-800">{title}</h2>
+    <div className="flex justify-between items-end mb-5 px-1">
+        <h2 className="text-2xl font-black text-gray-900 tracking-tight">{title}</h2>
         {actionText && (
-            <button onClick={onActionClick} className="text-sm font-semibold text-green-600 hover:text-green-700">
+            <button onClick={onActionClick} className="text-xs font-black text-teal-600 uppercase tracking-widest hover:text-teal-700 transition-colors">
                 {actionText}
             </button>
         )}
@@ -48,73 +44,33 @@ const SectionHeader: React.FC<{ title: string; actionText?: string; onActionClic
 
 const AnnouncementCard: React.FC<{ announcement: Announcement }> = ({ announcement }) => {
     return (
-        <div className="bg-white p-4 rounded-xl border border-gray-200 mb-3 transition-shadow duration-300 tilt-card">
-            <div>
-                <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-bold text-gray-900 text-md leading-tight flex-1 pr-2">{announcement.title}</h3>
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${announcement.status === ReportStatus.Emergency ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
-                        {announcement.status}
-                    </span>
-                </div>
-                <p className="text-gray-600 text-sm mb-3">{announcement.content}</p>
+        <div className="bg-white p-5 rounded-3xl border border-gray-100 mb-4 transition-all duration-300 shadow-sm hover:shadow-md active:scale-[0.98]">
+            <div className="flex justify-between items-start mb-3">
+                <h3 className="font-bold text-gray-900 text-lg leading-tight flex-1 pr-3">{announcement.title}</h3>
+                <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full ${announcement.status === ReportStatus.Emergency ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                    {announcement.status}
+                </span>
             </div>
-            <div className="flex justify-between items-center pt-3 border-t border-gray-100">
-                 <p className="text-xs text-gray-500 font-medium">{announcement.source}</p>
-                 <p className="text-xs text-gray-500">{announcement.timestamp}</p>
+            <p className="text-gray-500 text-sm font-medium leading-relaxed mb-4 line-clamp-2">{announcement.content}</p>
+            <div className="flex justify-between items-center pt-4 border-t border-gray-50">
+                 <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">{announcement.source}</p>
+                 <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Update Live</p>
             </div>
         </div>
     );
 };
 
-const DonationCard: React.FC<{ request: DonationRequest }> = ({ request }) => {
-    const { showToast } = useNotifications();
-    const percentage = Math.round((request.raised / request.goal) * 100);
-
-    return (
-        <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden min-w-[300px] snap-start flex-shrink-0 transform hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300">
-            <img src={request.image} alt={request.title} className="w-full h-40 object-cover" />
-            <div className="p-4">
-                <h3 className="font-bold text-gray-900">{request.title}</h3>
-                <p className="text-xs text-gray-500 mb-2">{request.patientName} at {request.hospital}</p>
-                <div className="my-3">
-                    <div className="flex justify-between items-center text-sm mb-1">
-                        <span className="font-medium text-gray-600">Raised: ₹{request.raised.toLocaleString('en-IN')}</span>
-                        <span className="font-medium text-gray-600">Goal: ₹{request.goal.toLocaleString('en-IN')}</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                        <div className="bg-green-500 h-2.5 rounded-full" style={{ width: `${percentage}%` }}></div>
-                    </div>
-                </div>
-                <button 
-                    onClick={() => showToast('Redirecting to secure payment...')}
-                    className="w-full mt-2 py-2.5 px-4 text-white font-semibold rounded-xl bg-green-600 hover:bg-green-700 shadow-sm">
-                    Donate Now
-                </button>
-            </div>
-        </div>
-    );
-}
-
-const ServiceCard: React.FC<{ icon: React.ReactNode, label: string, onClick: () => void, id?: string }> = ({ icon, label, onClick, id }) => (
-    <div id={id} className="flex flex-col items-center space-y-2 text-center">
+const QuickServiceCard: React.FC<{ icon: React.ReactNode, label: string, onClick: () => void, color?: string }> = ({ icon, label, onClick, color = "bg-white" }) => (
+    <div className="flex flex-col items-center space-y-3 text-center group">
         <button 
             onClick={onClick}
-            className="w-16 h-16 flex items-center justify-center bg-gray-100 rounded-2xl text-gray-700 transform hover:scale-105 hover:bg-green-100 hover:text-green-700 transition-all duration-200">
+            className={`w-16 h-16 flex items-center justify-center ${color} rounded-[1.5rem] text-gray-700 group-hover:bg-teal-50 group-hover:text-teal-600 transition-all duration-300 shadow-sm border border-gray-100 active:scale-90 overflow-hidden relative`}
+        >
+            <div className="absolute inset-0 bg-teal-500 opacity-0 group-active:opacity-10 transition-opacity"></div>
             {icon}
         </button>
-        <span className="text-xs font-medium text-gray-700 w-16">{label}</span>
+        <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest w-16 leading-tight">{label}</span>
     </div>
-);
-
-const QuickLinkCard: React.FC<{ icon: React.ReactNode, label: string, onClick: () => void }> = ({ icon, label, onClick }) => (
-  <button onClick={onClick} className="w-full bg-white rounded-xl p-4 flex items-center space-x-4 border border-gray-200 group text-left tilt-card">
-    <div className="bg-gray-100 group-hover:bg-green-100 rounded-lg p-2.5 transition-colors text-green-600">
-        {icon}
-    </div>
-    <div>
-        <h3 className="font-semibold text-sm text-gray-800">{label}</h3>
-    </div>
-  </button>
 );
 
 interface HomePageProps {
@@ -129,15 +85,10 @@ const HomePage: React.FC<HomePageProps> = ({ setCurrentPage, navigateToService, 
     const { user } = useContext(UserContext);
     const { t } = useTranslation();
     const { showToast } = useNotifications();
-    const [showOnboarding, setShowOnboarding] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-    const [donations, setDonations] = useState<DonationRequest[]>([]);
-    const [resolvedIssues, setResolvedIssues] = useState<ResolvedIssue[]>([]);
     const [pulse, setPulse] = useState<CityPulse | null>(null);
     const [aiBriefing, setAiBriefing] = useState<string>('');
 
-    // SOS Hold Logic
     const [sosHoldProgress, setSosHoldProgress] = useState(0);
     const sosHoldTimeoutRef = useRef<number | null>(null);
     const animationFrameRef = useRef<number | null>(null);
@@ -145,27 +96,17 @@ const HomePage: React.FC<HomePageProps> = ({ setCurrentPage, navigateToService, 
     const HOLD_DURATION = 2000;
 
     useEffect(() => {
-        const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
-        if (!hasSeenOnboarding) setShowOnboarding(true);
-
         const fetchData = async () => {
-            setIsLoading(true);
-            const [anns, dons, resolved, pulseData] = await Promise.all([
+            const [anns, pulseData] = await Promise.all([
                 mockApi.getAnnouncements(),
-                mockApi.getDonations(),
-                mockApi.getResolvedIssues(),
                 mockApi.getCityPulse(user?.location.district || 'City')
             ]);
             setAnnouncements(anns);
-            setDonations(dons);
-            setResolvedIssues(resolved);
             setPulse(pulseData);
             
             const briefing = await mockApi.getAiBriefing(user?.location.district || 'City', anns);
             setAiBriefing(briefing);
-            setIsLoading(false);
         };
-
         fetchData();
     }, [user]);
 
@@ -180,10 +121,7 @@ const HomePage: React.FC<HomePageProps> = ({ setCurrentPage, navigateToService, 
             if (progress < 1) animationFrameRef.current = requestAnimationFrame(animateProgress);
         };
         animationFrameRef.current = requestAnimationFrame(animateProgress);
-        sosHoldTimeoutRef.current = window.setTimeout(() => {
-            triggerSosFlow();
-            setSosHoldProgress(0);
-        }, HOLD_DURATION);
+        sosHoldTimeoutRef.current = window.setTimeout(() => { triggerSosFlow(); setSosHoldProgress(0); }, HOLD_DURATION);
     };
 
     const handleSosPressEnd = () => {
@@ -194,119 +132,96 @@ const HomePage: React.FC<HomePageProps> = ({ setCurrentPage, navigateToService, 
     };
 
     const emergencyServices = useMemo(() => [
-        { icon: <PoliceIcon />, label: t('police'), onClick: () => showToast('Calling Police Emergency: 100') },
-        { icon: <AmbulanceIcon />, label: t('ambulance'), onClick: () => showToast('Calling Ambulance Emergency: 108') },
-        { icon: <FireDeptIcon />, label: t('fireDept'), onClick: () => showToast('Calling Fire Department: 101') },
-        { icon: <BloodBankIcon />, label: t('bloodBank'), onClick: () => navigateToService('medicalHelp') },
+        { icon: <PoliceIcon />, label: t('police'), onClick: () => showToast('Calling Police: 100') },
+        { icon: <AmbulanceIcon />, label: t('ambulance'), onClick: () => showToast('Calling Ambulance: 108') },
+        { icon: <FireDeptIcon />, label: t('fireDept'), onClick: () => showToast('Calling Fire Dept: 101') },
         { icon: <HospitalIcon />, label: t('hospitals'), onClick: () => setCurrentPage(Page.Map) },
-        { id: 'new-report-button', icon: <NewReportIcon />, label: t('newReport'), onClick: () => setCurrentPage(Page.Report) },
-    ], [t, showToast, setCurrentPage, navigateToService]);
-    
-    const quickLinks = useMemo(() => [
-        { icon: <CertificateIcon />, label: 'Certificates', onClick: () => navigateToService('downloadCenter') },
-        { icon: <PayBillsIcon />, label: 'Pay Bills', onClick: () => navigateToService('waterPower') },
-        { icon: <NewConnectionIcon />, label: 'New Connection', onClick: () => navigateToService('waterPower') },
-        { icon: <MyReportsIcon />, label: t('myReports'), onClick: () => setCurrentPage(Page.Profile) },
-    ], [t, setCurrentPage, navigateToService]);
+        { icon: <NewReportIcon />, label: t('newReport'), onClick: () => setCurrentPage(Page.Report) },
+    ], [t, showToast, setCurrentPage]);
+
+    const medicalAidServices = useMemo(() => [
+        { icon: <BloodBankIcon />, label: t('bloodBank'), onClick: () => navigateToService('findBloodBanks'), color: "bg-red-50 text-red-600" },
+        { icon: <SyringeIcon className="w-7 h-7" />, label: t('bookVaccination'), onClick: () => navigateToService('bookVaccination'), color: "bg-blue-50 text-blue-600" },
+        { icon: <PregnantWomanIcon className="w-7 h-7" />, label: t('momsCare'), onClick: () => navigateToService('momsCare'), color: "bg-pink-50 text-pink-600" },
+        { icon: <AmbulanceIcon />, label: t('ambulance'), onClick: () => navigateToService('emergencyAmbulance'), color: "bg-orange-50 text-orange-600" },
+    ], [t, navigateToService]);
 
     return (
-        <div className="bg-gray-50 min-h-full">
-            {showOnboarding && <OnboardingGuide onFinish={() => { localStorage.setItem('hasSeenOnboarding', 'true'); setShowOnboarding(false); }} />}
-            
-            <div className="p-4 space-y-8">
-                {/* AI City Briefing */}
+        <div className="bg-slate-50 min-h-full pb-24">
+            <div className="p-5 space-y-10 relative z-10">
+                {/* AI Intelligence Core - Strictly 2 Lines */}
                 {!searchQuery && (
                     <section className="animate-fadeInUp">
-                        <div className="bg-gradient-to-br from-teal-600 to-green-700 rounded-3xl p-5 text-white shadow-xl relative overflow-hidden">
-                             <div className="absolute top-0 right-0 p-4 opacity-20"><AiAssistantIcon className="w-20 h-20"/></div>
+                        <div className="bg-slate-900 rounded-[2.5rem] p-7 text-white shadow-2xl relative overflow-hidden h-[160px] flex flex-col justify-center">
+                             <div className="absolute top-0 right-0 p-6 opacity-5"><AiAssistantIcon className="w-24 h-24"/></div>
                              <div className="relative z-10">
-                                <h2 className="text-sm font-bold opacity-80 uppercase tracking-widest mb-1">Morning Briefing</h2>
-                                <p className="text-lg font-bold leading-tight">
-                                    {aiBriefing || 'Generating your city summary...'}
+                                <h2 className="text-[10px] font-black text-teal-400 uppercase tracking-[0.3em] mb-3">AI Intelligence Core</h2>
+                                <p className="text-xl font-bold leading-tight tracking-tight line-clamp-2 overflow-hidden">
+                                    {aiBriefing || 'Analyzing municipal data streams...'}
                                 </p>
+                                <div className="mt-4 flex items-center space-x-2">
+                                    <span className="w-2 h-2 bg-teal-500 rounded-full animate-pulse"></span>
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">TN Smart Grid Online</span>
+                                </div>
                              </div>
                         </div>
                     </section>
                 )}
 
-                {/* City Pulse (Live Health) */}
                 {!searchQuery && (
                     <section className="animate-fadeInUp animation-delay-100">
                         <SectionHeader title="City Pulse" />
                         <CityPulseBar pulse={pulse} />
                     </section>
                 )}
+
+                {/* Medical Aid Row */}
+                {!searchQuery && (
+                    <section className="animate-fadeInUp animation-delay-200">
+                        <SectionHeader title="Medical Aid In City" />
+                        <div className="grid grid-cols-4 gap-x-2">
+                             {medicalAidServices.map(service => <QuickServiceCard key={service.label} {...service} />)}
+                        </div>
+                    </section>
+                )}
                 
-                {/* Emergency Services */}
-                <section className="animate-fadeInUp animation-delay-150">
+                <section className="animate-fadeInUp animation-delay-300">
                     <SectionHeader title={t('emergencyServices')} />
-                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-y-4 gap-x-2">
-                         {emergencyServices.map(service => <ServiceCard key={service.label} {...service} />)}
+                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-y-6 gap-x-3">
+                         {emergencyServices.map(service => <QuickServiceCard key={service.label} {...service} />)}
                     </div>
                 </section>
 
-                {/* Announcements */}
-                <section className="animate-fadeInUp animation-delay-300">
+                <section className="animate-fadeInUp animation-delay-400">
                     <SectionHeader title={t('govtAnnouncements')} actionText={t('viewAll')} onActionClick={() => setView('allAnnouncements')} />
                     <div>
                         {announcements.slice(0, 2).map(ann => <AnnouncementCard key={ann.id} announcement={ann} />)}
                     </div>
                 </section>
-                
-                {/* Urgent Medical Needs */}
-                <section className="animate-fadeInUp animation-delay-400">
-                     <SectionHeader title={t('urgentMedicalNeeds')} actionText={t('seeMore')} onActionClick={() => setView('allDonations')} />
-                     <div className="flex space-x-4 overflow-x-auto pb-3 snap-x -mx-4 px-4 no-scrollbar">
-                        {donations.map(req => <DonationCard key={req.id} request={req} />)}
-                     </div>
-                </section>
-                
-                {/* Quick Links */}
-                <section className="animate-fadeInUp animation-delay-500">
-                    <SectionHeader title={t('quickLinks')} />
-                    <div className="grid grid-cols-2 gap-3">
-                         {quickLinks.map(link => <QuickLinkCard key={link.label} {...link} />)}
-                    </div>
-                </section>
-
-                {/* Security Feature Info */}
-                <section className="animate-fadeInUp animation-delay-600">
-                    <div className="bg-blue-50 border-2 border-blue-200/50 rounded-2xl p-4 flex items-start space-x-4">
-                        <div className="flex-shrink-0 text-blue-600 pt-1">
-                            <PhoneVibrateIcon className="w-8 h-8" />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-blue-900">Next-Gen: Shake for SOS</h3>
-                            <p className="text-sm text-blue-800/90 mt-1">
-                                Discretely alert command centers by shaking your phone vigorously 3 times. Enable in Profile.
-                            </p>
-                        </div>
-                    </div>
-                </section>
             </div>
 
-            {/* SOS Floating Action Button */}
-            <button
-                onMouseDown={handleSosPressStart}
-                onTouchStart={handleSosPressStart}
-                onMouseUp={handleSosPressEnd}
-                onTouchEnd={handleSosPressEnd}
-                onMouseLeave={handleSosPressEnd}
-                className="fixed bottom-20 right-4 z-30 w-16 h-16 bg-red-600 text-white rounded-full shadow-lg flex items-center justify-center focus:outline-none animate-pulse-sos"
-                aria-label="Hold for SOS"
-            >
-                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
-                    <circle className="text-red-400/50" stroke="currentColor" strokeWidth="8" cx="50" cy="50" r="46" fill="transparent" />
-                    <circle
-                        className="text-white transition-all duration-100 linear"
-                        stroke="currentColor" strokeWidth="8" strokeLinecap="round" cx="50" cy="50" r="46" fill="transparent"
-                        strokeDasharray={2 * Math.PI * 46}
-                        strokeDashoffset={(2 * Math.PI * 46) * (1 - sosHoldProgress)}
-                        transform="rotate(-90 50 50)"
-                    />
-                </svg>
-                <SOSIcon className="w-8 h-8 z-10" />
-            </button>
+            {/* Strictly Fixed SOS FAB - Higher Z-Index */}
+            <div className="fixed bottom-20 right-5 z-[70]">
+                <button
+                    onMouseDown={handleSosPressStart}
+                    onTouchStart={handleSosPressStart}
+                    onMouseUp={handleSosPressEnd}
+                    onTouchEnd={handleSosPressEnd}
+                    className="w-16 h-16 bg-red-600 text-white rounded-full shadow-[0_10px_30px_rgba(220,38,38,0.5)] flex items-center justify-center focus:outline-none transition-transform active:scale-90"
+                >
+                    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+                        <circle className="text-red-400/30" stroke="currentColor" strokeWidth="6" cx="50" cy="50" r="46" fill="transparent" />
+                        <circle
+                            className="text-white transition-all duration-100"
+                            stroke="currentColor" strokeWidth="6" strokeLinecap="round" cx="50" cy="50" r="46" fill="transparent"
+                            strokeDasharray={2 * Math.PI * 46}
+                            strokeDashoffset={(2 * Math.PI * 46) * (1 - sosHoldProgress)}
+                            transform="rotate(-90 50 50)"
+                        />
+                    </svg>
+                    <SOSIcon className="w-8 h-8 z-10 animate-pulse-sos" />
+                </button>
+            </div>
         </div>
     );
 };

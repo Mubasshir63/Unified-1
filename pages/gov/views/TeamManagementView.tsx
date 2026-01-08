@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { DetailedReport, ReportStatus, TeamMember } from '../../../types';
 import { PlusCircleIcon } from '../../../components/icons/NavIcons';
@@ -24,6 +25,7 @@ const TeamMemberCard: React.FC<TeamMemberCardProps> = ({ member, stats, onEdit, 
         <p className="text-sm font-semibold text-teal-600 mb-4">{member.role}</p>
         
         <div className="w-full grid grid-cols-2 gap-2 text-xs my-auto">
+            {/* FIX: Use stats prop instead of non-existent member.stats */}
             <div className="bg-blue-50 p-2 rounded-lg"><p className="font-bold text-blue-700 text-lg">{stats.assigned}</p><p className="text-blue-600 font-medium">Assigned</p></div>
             <div className="bg-green-50 p-2 rounded-lg"><p className="font-bold text-green-700 text-lg">{stats.resolved}</p><p className="text-green-600 font-medium">Resolved</p></div>
             <div className="bg-yellow-50 p-2 rounded-lg"><p className="font-bold text-yellow-700 text-lg">{stats.avgTime}</p><p className="text-yellow-600 font-medium">Avg Time</p></div>
